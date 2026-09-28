@@ -290,8 +290,16 @@ html[lang="ja"] .j-row{grid-template-columns:96px 1fr}
 }
 .btn-retry:active{transform:scale(.97);background:rgba(0,0,0,.05)}
 /* 직원 전용: 사은품 증정 완료 처리 (중복 증정 방지) */
-.btn-given{border-style:dashed}
-.btn-given:disabled{border-style:solid;border-color:#3f7d4e;color:#3f7d4e;background:rgba(63,125,78,.08);cursor:default;transform:none}
+.btn-given{border:none;background:#D9480F;color:#fff;box-shadow:0 10px 24px rgba(217,72,15,.35);animation:gGivenPulse 1.6s ease-in-out infinite}
+.btn-given:active{background:#b83c0c}
+@keyframes gGivenPulse{0%,100%{box-shadow:0 0 0 0 rgba(217,72,15,.55),0 10px 24px rgba(217,72,15,.35)}50%{box-shadow:0 0 0 10px rgba(217,72,15,0),0 10px 24px rgba(217,72,15,.35)}}
+.btn-given:disabled{border:1.5px solid #2f7d4a;color:#2f7d4a;background:rgba(47,125,74,.1);box-shadow:none;animation:none;cursor:default;transform:none}
+/* 가챠 결과: 직원에게 보여주세요 안내 강조 */
+#gcNotice{background:linear-gradient(135deg,#F8E3A1,#C6A550);border:2px solid #a8883a;box-shadow:0 10px 26px rgba(198,165,80,.4);animation:gNoticeGlow 2s ease-in-out infinite}
+#gcNotice .notice-badge{background:#1f1a10;color:#F8E3A1;padding:4px 12px;border-radius:999px;text-indent:0}
+#gcNotice .notice-title{font-size:22px;color:#2a1f08}
+#gcNotice .notice-sub{color:#4a3410;font-weight:500}
+@keyframes gNoticeGlow{0%,100%{transform:scale(1)}50%{transform:scale(1.02)}}
 .r-cta{width:100%;margin:16px 0 4px}
 .btn-cta{
   display:flex;flex-direction:column;align-items:center;gap:4px;
