@@ -339,8 +339,35 @@ html[lang="ja"] .j-row{grid-template-columns:96px 1fr}
 @keyframes gFall{from{transform:translateY(-150px) scale(.8);opacity:0}to{transform:translateY(0) scale(1);opacity:1}}
 .capsule.landed{animation:gBounce .38s ease}
 @keyframes gBounce{0%{transform:scale(1)}30%{transform:scale(1.16,.84)}60%{transform:scale(.92,1.08)}100%{transform:scale(1)}}
+/* 손잡이 회전 + 돔 속 캡슐 뒤섞임 */
+.knob,.dome-mix{transform-box:view-box}
+.knob{transform-origin:188px 238px}
+.knob.turn{animation:gTurn 1.3s ease-in-out 2}
+@keyframes gTurn{to{transform:rotate(360deg)}}
+.dome-mix{transform-origin:118px 92px}
+.machine.shake-slow .dome-mix{animation:gMix .9s ease-in-out infinite}
+.machine.shake .dome-mix{animation:gMix .28s linear infinite}
+@keyframes gMix{0%,100%{transform:rotate(0) translateY(0)}25%{transform:rotate(-16deg) translateY(-5px)}75%{transform:rotate(16deg) translateY(4px)}}
+/* 배출구에서 좌우로 구르다가 앞으로 굴러 나와 커짐 → 흔들흔들 → 열림 */
+.capsule.rolling{animation:gRoll 1.2s cubic-bezier(.4,0,.3,1) forwards}
+@keyframes gRoll{
+  0%{transform:translate(0,0) rotate(0) scale(1)}
+  28%{transform:translate(30px,0) rotate(200deg) scale(1)}
+  50%{transform:translate(-14px,0) rotate(-40deg) scale(1)}
+  80%{transform:translate(0,62px) rotate(360deg) scale(1.45)}
+  90%{transform:translate(0,54px) rotate(360deg) scale(1.55,1.35)}
+  100%{transform:translate(0,58px) rotate(360deg) scale(1.5)}
+}
+.capsule.wobble{animation:gWobble .7s ease-in-out forwards}
+@keyframes gWobble{
+  0%,100%{transform:translate(0,58px) scale(1.5) rotate(0)}
+  20%{transform:translate(0,58px) scale(1.5) rotate(-14deg)}
+  40%{transform:translate(0,58px) scale(1.5) rotate(12deg)}
+  60%{transform:translate(0,58px) scale(1.55) rotate(-9deg)}
+  80%{transform:translate(0,58px) scale(1.6) rotate(6deg)}
+}
 .capsule.open{animation:gPop .45s ease forwards}
-@keyframes gPop{to{transform:scale(1.35);opacity:0}}
+@keyframes gPop{from{transform:translate(0,58px) scale(1.6)}to{transform:translate(0,58px) scale(2.4);opacity:0}}
 .gacha-result{position:relative;display:none;width:100%;justify-content:center;margin-top:14px;flex-shrink:0}
 .gacha-result.show{display:flex;animation:rise .55s ease both}
 .gacha-result::before{
@@ -616,10 +643,12 @@ html[lang="ja"] .j-row{grid-template-columns:96px 1fr}
           <rect x="32" y="232" width="28" height="9" rx="3" fill="url(#chrome)"/>
           <rect x="32" y="232" width="28" height="3" fill="#8f8f8f" opacity=".5"/>
 
+          <g class="knob" id="knob">
           <circle cx="188" cy="238" r="21" fill="url(#chrome)" stroke="rgba(0,0,0,.25)"/>
           <circle cx="188" cy="238" r="21" fill="none" stroke="#fff" stroke-opacity=".5"/>
           <rect x="184" y="219" width="8" height="17" rx="3" fill="#b0b0b0"/>
           <circle cx="188" cy="238" r="5" fill="#a8a8a8"/>
+          </g>
 
           <rect x="60" y="246" width="116" height="50" rx="10" fill="url(#chrome)"/>
           <rect x="65" y="250" width="106" height="42" rx="7" fill="#c7c7c7" stroke="rgba(255,255,255,.4)"/>
@@ -1853,16 +1882,19 @@ function nowStamp(){
   const pad=n=>String(n).padStart(2,'0');
   return `${d.getFullYear()}.${pad(d.getMonth()+1)}.${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
+/* localStorage가 막힌 브라우저(시크릿·일부 인앱)에서도 현재 화면에서는 잠금/증정 버튼이 동작하도록 메모리 사본을 함께 둔다 */
+let memLock=null;
 function getGachaLock(){
+  let data=memLock;
   try{
     const raw=localStorage.getItem(GACHA_LOCK_KEY);
-    if(!raw)return null;
-    const data=JSON.parse(raw);
-    return data.date===todayStr()?data:null;
-  }catch(e){ return null; }
+    if(raw) data=JSON.parse(raw);
+  }catch(e){}
+  return data&&data.date===todayStr()?data:null;
 }
 function setGachaLock(rank,stamp,given){
-  try{ localStorage.setItem(GACHA_LOCK_KEY,JSON.stringify({date:todayStr(),rank,stamp,given})); }catch(e){}
+  memLock={date:todayStr(),rank,stamp,given};
+  try{ localStorage.setItem(GACHA_LOCK_KEY,JSON.stringify(memLock)); }catch(e){}
 }
 /* 직원 확인 버튼: 누르면 오늘 뽑기 기록에 증정 시각을 남겨, 같은 화면을 다시 보여줘도 재증정되지 않게 한다 */
 function renderGivenBtn(lock){
@@ -1956,7 +1988,7 @@ function fillDome(){
       <circle cx="-3" cy="-3" r="2" fill="#fff" fill-opacity=".85"/>
     </g>`;
   }
-  box.innerHTML=html;
+  box.innerHTML=`<g class="dome-mix">${html}</g>`;
 }
 let gachaDrawn=false, gachaBusy=false;
 $('btnPull').addEventListener('click',()=>{
@@ -1965,6 +1997,8 @@ $('btnPull').addEventListener('click',()=>{
   const susp=$('gSuspense'), mach=$('machine'), msgs=SUSPENSE_MSGS[LANG];
   susp.textContent=msgs[0];
   mach.classList.add('shake-slow');
+  const knob=$('knob'); knob.classList.remove('turn'); void knob.getBoundingClientRect(); knob.classList.add('turn');
+  if(navigator.vibrate) navigator.vibrate([40,120,40,120,40]);
   setTimeout(()=>{
     mach.classList.remove('shake-slow'); mach.classList.add('shake');
     susp.textContent=msgs[1];
@@ -1984,11 +2018,18 @@ function dropCapsule(){
   </div>`;
   const cap=slot.querySelector('.capsule');
   setTimeout(()=>{
-    cap.classList.add('landed');
+    cap.className='capsule landed';
     setTimeout(()=>{
-      cap.classList.add('open');
-      setTimeout(()=>{ showGachaResult(idx); },650);
-    },480);
+      cap.className='capsule rolling';
+      setTimeout(()=>{
+        cap.className='capsule wobble';
+        setTimeout(()=>{
+          cap.className='capsule open';
+          if(navigator.vibrate) navigator.vibrate(80);
+          setTimeout(()=>{ showGachaResult(idx); },420);
+        },700);
+      },1200);
+    },400);
   },720);
 }
 function showGachaResult(idx){
