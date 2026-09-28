@@ -1900,9 +1900,28 @@ function getGachaLock(){
   }catch(e){}
   return data&&data.date===todayStr()?data:null;
 }
-function setGachaLock(rank,stamp,given){
-  memLock={date:todayStr(),rank,stamp,given};
+function setGachaLock(data){
+  memLock={...data,date:todayStr()};
   try{ localStorage.setItem(GACHA_LOCK_KEY,JSON.stringify(memLock)); }catch(e){}
+}
+/* 증정 기록 → Google 시트 (Perfume_Curation/GachaLog_GAS 웹앱).
+   전송 실패(오프라인 등) 시 logged가 false로 남아, 다음에 이 화면이 그려질 때 다시 보낸다. */
+const GACHA_LOG_URL='https://script.google.com/macros/s/AKfycbxC4kL6xYudTCMW0VrLpCKXIfH8D7YfOTCZK_bLR7SbrTLrf8v9eoSOWAk75Si04DzZ/exec';
+const DEVICE_ID=(()=>{ try{
+  let v=localStorage.getItem('scentica_device');
+  if(!v){ v=Math.random().toString(36).slice(2,10); localStorage.setItem('scentica_device',v); }
+  return v;
+}catch(e){ return ''; } })();
+let logSending=false;
+function sendGivenLog(lock){
+  if(logSending)return;
+  logSending=true;
+  const gtx=GACHA_TEXT.ko[lock.rank-1];
+  fetch(GACHA_LOG_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain'},
+    body:JSON.stringify({given:lock.given,store:lock.store||'',rank:lock.rank,prize:gtx?gtx.desc:'',stamp:lock.stamp,lang:LANG,device:DEVICE_ID})})
+    .then(()=>{ const cur=getGachaLock(); if(cur&&cur.given===lock.given) setGachaLock({...cur,logged:true}); })
+    .catch(()=>{})
+    .finally(()=>{ logSending=false; });
 }
 /* 직원 확인 버튼: 누르면 오늘 뽑기 기록에 증정 시각을 남겨, 같은 화면을 다시 보여줘도 재증정되지 않게 한다 */
 function renderGivenBtn(lock){
@@ -1916,7 +1935,7 @@ $('btnGiven').addEventListener('click',()=>{
   const lock=getGachaLock();
   if(!lock||lock.given)return;
   if(!confirm('[직원 확인] 사은품을 증정하셨나요?\n확인 후에는 되돌릴 수 없습니다.'))return;
-  setGachaLock(lock.rank,lock.stamp,nowStamp());
+  setGachaLock({...lock,given:nowStamp()});
   applyGachaLock();
 });
 function applyGachaLock(){
@@ -1925,6 +1944,7 @@ function applyGachaLock(){
   $('gLockBadge').textContent=gt.lockBadge;
   $('gLockTitle').textContent=gt.lockTitle;
   renderGivenBtn(lock);
+  if(lock&&lock.given&&!lock.logged) sendGivenLog(lock);
   if(lock){
     const gtx=GACHA_TEXT[LANG][lock.rank-1];
     $('gLockSub').textContent=gt.lockSub(gtx?gtx.label:lock.rank,gtx?gtx.desc:'',lock.stamp);
@@ -2069,7 +2089,7 @@ function showGachaResult(idx){
     burstConfetti(cfg);
     $('gcNotice').style.display='';
     $('scr-gacha').classList.add('result-only');
-    setGachaLock(cfg.rank,stamp);
+    setGachaLock({rank:cfg.rank,stamp,store});
     applyGachaLock();
     armIdle();
   },640);
