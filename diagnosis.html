@@ -289,6 +289,9 @@ html[lang="ja"] .j-row{grid-template-columns:96px 1fr}
   cursor:pointer;transition:background .25s,transform .12s;
 }
 .btn-retry:active{transform:scale(.97);background:rgba(0,0,0,.05)}
+/* 직원 전용: 사은품 증정 완료 처리 (중복 증정 방지) */
+.btn-given{border-style:dashed}
+.btn-given:disabled{border-style:solid;border-color:#3f7d4e;color:#3f7d4e;background:rgba(63,125,78,.08);cursor:default;transform:none}
 .r-cta{width:100%;margin:16px 0 4px}
 .btn-cta{
   display:flex;flex-direction:column;align-items:center;gap:4px;
@@ -638,6 +641,7 @@ html[lang="ja"] .j-row{grid-template-columns:96px 1fr}
         <strong class="notice-title" id="gcNoticeTitle">이 화면을 직원에게 보여주세요</strong>
         <span class="notice-sub" id="gcNoticeSub">등수에 맞는 사은품을 안내드립니다</span>
       </div>
+      <button class="btn-retry btn-given" id="btnGiven" style="display:none">직원 확인 · 증정 완료 처리</button>
     </div>
   </section>
 </div>
@@ -1857,14 +1861,30 @@ function getGachaLock(){
     return data.date===todayStr()?data:null;
   }catch(e){ return null; }
 }
-function setGachaLock(rank,stamp){
-  try{ localStorage.setItem(GACHA_LOCK_KEY,JSON.stringify({date:todayStr(),rank,stamp})); }catch(e){}
+function setGachaLock(rank,stamp,given){
+  try{ localStorage.setItem(GACHA_LOCK_KEY,JSON.stringify({date:todayStr(),rank,stamp,given})); }catch(e){}
 }
+/* 직원 확인 버튼: 누르면 오늘 뽑기 기록에 증정 시각을 남겨, 같은 화면을 다시 보여줘도 재증정되지 않게 한다 */
+function renderGivenBtn(lock){
+  const b=$('btnGiven');
+  b.style.display=lock?'':'none';
+  if(!lock)return;
+  b.disabled=!!lock.given;
+  b.textContent=lock.given?`✅ 증정 완료 · GIFT RECEIVED (${lock.given})`:'직원 확인 · 증정 완료 처리';
+}
+$('btnGiven').addEventListener('click',()=>{
+  const lock=getGachaLock();
+  if(!lock||lock.given)return;
+  if(!confirm('[직원 확인] 사은품을 증정하셨나요?\n확인 후에는 되돌릴 수 없습니다.'))return;
+  setGachaLock(lock.rank,lock.stamp,nowStamp());
+  applyGachaLock();
+});
 function applyGachaLock(){
   const lock=getGachaLock();
   const notice=$('gLockNotice'), pull=$('btnPull'), gt=UI[LANG].gacha;
   $('gLockBadge').textContent=gt.lockBadge;
   $('gLockTitle').textContent=gt.lockTitle;
+  renderGivenBtn(lock);
   if(lock){
     const gtx=GACHA_TEXT[LANG][lock.rank-1];
     $('gLockSub').textContent=gt.lockSub(gtx?gtx.label:lock.rank,gtx?gtx.desc:'',lock.stamp);
