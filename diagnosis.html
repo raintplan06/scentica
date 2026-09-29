@@ -265,9 +265,6 @@ html[lang="ja"] .store{font-size:9.5px;padding:13px 17px}
 }
 .journey{margin-top:20px;display:grid;gap:11px}
 .j-row{display:grid;grid-template-columns:74px 1fr;gap:14px;align-items:baseline}
-/* 일본어 'ラストノート'(6자)는 74px 라벨 칸에 다 안 들어가 'ト' 한 글자가
-   다음 줄로 밀려 어색하게 잘렸다 — 일본어에서만 라벨 칸을 넓힌다. */
-html[lang="ja"] .j-row{grid-template-columns:96px 1fr}
 .j-k{font-size:11.5px;letter-spacing:.16em;color:var(--accent);padding-top:2px}
 .j-v{font-size:15px;line-height:1.66;color:var(--ink);font-weight:300}
 .r-foot{
@@ -456,6 +453,32 @@ html[lang="ja"] .j-row{grid-template-columns:96px 1fr}
   .opt .l{font-size:15.5px;line-height:1.35}
   .opt .s{font-size:12.5px;line-height:1.4}
   .opts:not(.single) .opt:last-child:nth-child(odd){grid-column:span 2}
+  /* 모바일 결과 압축 */
+  .r-head{margin:6px 0 16px}
+  .r-eyebrow{margin-bottom:8px}
+  .r-title{font-size:24px}
+  .r-sub{margin-top:6px;font-size:13.5px}
+  .psych-card{padding:16px 18px!important;margin-bottom:12px!important}
+  .psych-eyebrow{margin-bottom:6px}
+  .psych-text{font-size:14px;line-height:1.65}
+  .rcard{padding:18px 18px 16px;border-radius:18px;margin-bottom:10px}
+  .r-rank{margin-bottom:8px;gap:8px}
+  .r-name{font-size:23px}
+  .r-en{font-size:11.5px;margin-top:3px}
+  .r-fam{margin-top:4px;font-size:13.5px}
+  .r-match{display:flex;align-items:baseline;gap:6px;margin-top:6px}
+  .r-match b{font-size:22px}
+  .r-match span{margin:0}
+  .r-story{margin-top:10px;padding:8px 12px;font-size:13px;line-height:1.55}
+  .chips{margin-top:10px;gap:6px}
+  .chip{font-size:12.5px;padding:5px 11px}
+  .journey{margin-top:12px;gap:7px}
+  .j-row{grid-template-columns:50px 1fr;gap:10px}
+  .j-k{font-size:11px;letter-spacing:.08em}
+  .j-v{font-size:13.5px;line-height:1.55}
+  .r-foot{gap:10px;margin:14px 0 4px}
+  .r-notice{padding:14px 16px}
+  .btn-retry{min-height:56px;padding:12px 20px}
   .opts.single .opt{display:grid;grid-template-columns:22px 1fr;column-gap:10px;align-items:center}
   .opts.single .opt .ic{grid-row:span 2;margin:0}
 }
@@ -1476,7 +1499,7 @@ ko:{
     subDefault:'센티카가 고른 오늘의 큐레이션입니다',
     ranks:['베스트 매치','두 번째 향','세 번째 향'],
     lineBadge:l=>`${l} 라인`,exclBadge:s=>`${s} 매장 단독`,
-    jTop:'첫인상',jMid:'피어남',jDry:'잔향',
+    jTop:'탑',jMid:'미들',jDry:'베이스',
     noticeBadge:'PLEASE SHOW STAFF',noticeTitle:'이 화면을 직원에게 보여주세요',noticeSub:'추천드린 순서대로 시향을 도와드립니다',
     gachaCtaLabel:'🎰 가챠 뽑기 이벤트 참여하기',gachaCtaSub:'진단 완료 기념, 캡슐 뽑고 등수 확인하기 →',
     retry:'처음부터 다시하기',
@@ -1491,7 +1514,7 @@ ko:{
   store:{'광안':'광안','전포':'전포','한남':'한남','소격':'소격'},
   line:{'시그니처':'시그니처','플라워':'플라워'},
   psych:{eyebrow:'오늘의 기분에 어울리는 향기',
-    /* 문장 조립 순서: lead q6 q1 q2 q3 q4 q5 / q7 closing — 쉼표·고정 접속어 없이 답변마다 문장 구조와 어미를 달리해 결과마다 다르게 읽히도록 함 */
+    /* 문장 조립 순서: q1 q2 q4 closing (모바일 스크롤 줄이려 2026-09-29 축약, lead·q3·q5·q6·q7 문장은 현재 미사용) — 쉼표·고정 접속어 없이 답변마다 문장 구조와 어미를 달리해 결과마다 다르게 읽히도록 함 */
     lead:'오늘 당신의 마음을 가만히 들여다보았습니다.',
     q1:['지금 가장 바라는 건 잔잔하지만 확실한 나만의 안정감이에요.','특별한 날 잊히지 않을 인상을 남기고 싶은 마음이 엿보입니다.','말로 다 못한 마음을 향에 담아 전하고 싶으신 것 같아요.','지친 하루 끝에서 산뜻한 나를 되찾고 싶은 마음이 보입니다.'],
     q2:['머릿속을 맑게 비워낼 시간도 필요해 보여요.','탁 트인 곳으로 훌쩍 떠나고 싶은 자유로움이 느껴집니다.','오늘은 조용히 나 자신에게 집중하고 싶으시죠.','따뜻한 위로 한 모금이 간절한 하루네요.','작은 행복과 달콤한 보상이 필요한 순간입니다.','스스로를 한껏 피워내고 싶은 에너지가 가득해요.','사람들과 어울리며 생기를 나누고 싶은 기분이에요.'],
@@ -1500,7 +1523,7 @@ ko:{
     q5:['존재감은 굳이 드러내지 않아도 괜찮아요.','은은하지만 분명하게 알아봐 주길 바라는 마음도 있죠.','지나간 자리마다 확실한 여운을 남기고 싶은 자신감도 보입니다.'],
     q6:['향수라는 낯선 세계를 조심스레 탐색하는 중이시군요.','이미 아끼는 향 몇 가지와 함께해 온 익숙한 감각이 느껴져요.','남들과 다른 나만의 향을 찾아 헤매는 예민한 감각을 지니셨네요.'],
     q7:['가볍고 산뜻한 계절의 온도가 잘 어울리는 하루예요.','깊고 따뜻한 계절의 온도가 마음에 머물러 있네요.','계절에 얽매이지 않는 나만의 온도를 품고 있어요.'],
-    closing:name=>`이 모든 감정을 향으로 옮겼을 때 가장 먼저 응답한 향은 <strong>${name}</strong>입니다. 지금 당신의 기분에 꼭 맞닿아 있는 오늘의 향이에요.`}
+    closing:name=>`이 모든 감정을 향으로 옮겼을 때 가장 먼저 응답한 향은 <strong>${name}</strong>입니다.`}
 },
 en:{
   intro:{eyebrow:'PERFUME CURATION',
@@ -1513,7 +1536,7 @@ en:{
     subDefault:"Scentica's curation for you today",
     ranks:['Best Match','Second Scent','Third Scent'],
     lineBadge:l=>`${l} Line`,exclBadge:s=>`${s} Exclusive`,
-    jTop:'Opening',jMid:'Heart',jDry:'Dry Down',
+    jTop:'Top',jMid:'Middle',jDry:'Base',
     noticeBadge:'PLEASE SHOW STAFF',noticeTitle:'Please show this screen to our staff',noticeSub:"We'll guide your sampling in the recommended order",
     gachaCtaLabel:'🎰 Join the Gacha Draw Event',gachaCtaSub:'To celebrate your diagnosis, pull a capsule and check your prize →',
     retry:'Start Over',
@@ -1536,7 +1559,7 @@ en:{
     q5:['Your presence does not need to be loud.','You still hope to be noticed in a quiet but clear way.','Leaving a confident trace wherever you go feels right.'],
     q6:['You are just beginning to explore the world of perfume.','You already know and love a few scents of your own.','You have a sharp instinct for scents unlike anyone else’s.'],
     q7:['Today feels light and fresh like a bright season.','The warmth of a deeper season lingers in your heart.','You carry a temperature all your own that no season defines.'],
-    closing:name=>`The first scent to answer all of these feelings was <strong>${name}</strong>. It is the fragrance that meets your mood today.`}
+    closing:name=>`The first scent to answer all of these feelings was <strong>${name}</strong>.`}
 },
 zh:{
   intro:{eyebrow:'PERFUME CURATION',
@@ -1549,7 +1572,7 @@ zh:{
     subDefault:'SCENTICA为你精选的今日香氛',
     ranks:['最佳匹配','第二支香','第三支香'],
     lineBadge:l=>`${l}系列`,exclBadge:s=>`${s}店专属`,
-    jTop:'前调',jMid:'中调',jDry:'尾调',
+    jTop:'前调',jMid:'中调',jDry:'后调',
     noticeBadge:'PLEASE SHOW STAFF',noticeTitle:'请将此页面出示给店员',noticeSub:'我们将按照推荐顺序为您试香',
     gachaCtaLabel:'🎰 参与扭蛋抽奖活动',gachaCtaSub:'完成诊断纪念,抽取胶囊查看中奖等级 →',
     retry:'重新开始',
@@ -1572,7 +1595,7 @@ zh:{
     q5:['存在感无需刻意张扬。','你也希望被人安静而清晰地注意到。','你想在经过之处留下自信的余韵。'],
     q6:['你正小心翼翼地探索香水的世界。','你早已有几款钟爱的香气陪伴左右。','你有着寻找与众不同气味的敏锐直觉。'],
     q7:['今天适合轻盈清爽的季节温度。','深邃温暖的季节温度停留在你心里。','你拥有不受季节束缚的专属温度。'],
-    closing:name=>`最先回应这些情绪的香气正是<strong>${name}</strong>。这是与你此刻心情最贴合的香气。`}
+    closing:name=>`最先回应这些情绪的香气正是<strong>${name}</strong>。`}
 },
 ja:{
   intro:{eyebrow:'PERFUME CURATION',
@@ -1585,7 +1608,7 @@ ja:{
     subDefault:'センティカが選んだ本日のキュレーションです',
     ranks:['ベストマッチ','2番目の香り','3番目の香り'],
     lineBadge:l=>`${l}ライン`,exclBadge:s=>`${s}店限定`,
-    jTop:'トップ',jMid:'ミドル',jDry:'ラストノート',
+    jTop:'トップ',jMid:'ミドル',jDry:'ベース',
     noticeBadge:'PLEASE SHOW STAFF',noticeTitle:'この画面をスタッフにお見せください',noticeSub:'おすすめした順にお試しいただけます',
     gachaCtaLabel:'🎰 ガチャ抽選イベントに参加する',gachaCtaSub:'診断完了記念、カプセルを引いて順位を確認 →',
     retry:'最初からやり直す',
@@ -1608,7 +1631,7 @@ ja:{
     q5:['存在感はあえて主張しなくてもかまいません。','さりげなくても確かに気づいてほしい気持ちもあります。','通り過ぎた後に確かな余韻を残したい自信も感じられます。'],
     q6:['香水という未知の世界をゆっくり探り始めたところですね。','お気に入りの香りをすでにいくつか大切にしてきた感覚があります。','誰とも違う自分だけの香りを追い求める鋭い感性をお持ちです。'],
     q7:['軽やかで爽やかな季節の温度が似合う一日です。','深く温かな季節の温度が心に残っています。','季節にとらわれない自分だけの温度を持っています。'],
-    closing:name=>`すべての気持ちに最初に応えた香りは<strong>${name}</strong>でした。今日のあなたの気分にそっと寄り添う香りです。`}
+    closing:name=>`すべての気持ちに最初に応えた香りは<strong>${name}</strong>でした。`}
 }
 };
 
@@ -1783,8 +1806,7 @@ function psychHTML(bestName){
   const [q1,q2,q3,q4,q5,q6,q7]=['q1','q2','q3','q4','q5','q6','q7'].map(k=>t[k][ix[k]]);
   const sep=(LANG==='zh'||LANG==='ja')?'':' '; /* 중국어·일본어는 문장 사이 띄어쓰기 없음 */
   return `<div class="psych-eyebrow">${t.eyebrow}</div>
-    <p class="psych-text">${[t.lead,q6,q1,q2,q3,q4,q5].join(sep)}</p>
-    <p class="psych-text">${[q7,t.closing(bestName)].join(sep)}</p>`;
+    <p class="psych-text">${[q1,q2,q4,t.closing(bestName)].join(sep)}</p>`;
 }
 
 function renderResult(){
