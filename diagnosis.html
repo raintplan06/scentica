@@ -218,8 +218,12 @@ html[lang="ja"] .store{font-size:9.5px;padding:13px 17px}
 @keyframes gNote{0%,100%{opacity:.18}5%,27%{opacity:1}32%{opacity:.18}}
 .load-msg{
   font-family:var(--serif);font-size:21px;color:var(--ink);min-height:34px;
-  transition:opacity .25s;text-align:center;text-wrap:balance;
+  text-align:center;text-wrap:balance;
 }
+.load-msg.msg-out{animation:msgOut .2s ease-in forwards}
+.load-msg.msg-in{animation:msgIn .35s ease-out both}
+@keyframes msgOut{to{opacity:0}}
+@keyframes msgIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 
 /* ---------- result ---------- */
 .screen.result-screen{justify-content:flex-start;overflow-y:auto;padding-top:8px;-webkit-overflow-scrolling:touch}
@@ -1754,14 +1758,18 @@ function finish(){
   $('progBar').style.width='100%';
   show('scr-loading');
   const msgs=LOAD_MSGS[LANG];
-  let i=0; $('loadMsg').textContent=msgs[0];
-  /* 1.1초마다 문구 교체: 0.25초 동안 완전히 사라진 뒤 바꿔서 이전 문구와 겹치지 않게 (TOP/MIDDLE/BASE 전환과 같은 박자) */
-  const el=$('loadMsg'); el.style.opacity=1;
+  let i=0;
+  /* 1.1초마다 문구 교체: 사라짐(0.2초) → 빈 칸(0.1초) → 새 문구가 처음부터 나타남.
+     글자를 비운 뒤 다시 넣으므로 이전 문구와 겹칠 수 없다 (TOP/MIDDLE/BASE 전환과 같은 박자) */
+  const el=$('loadMsg');
+  const showMsg=txt=>{ el.classList.remove('msg-out','msg-in'); el.textContent=txt; void el.offsetWidth; el.classList.add('msg-in'); };
+  showMsg(msgs[0]);
   const t=setInterval(()=>{
     i++;
     if(i<msgs.length){
-      el.style.opacity=0;
-      setTimeout(()=>{ el.textContent=msgs[i]; el.style.opacity=1; },260);
+      el.classList.remove('msg-in'); el.classList.add('msg-out');
+      setTimeout(()=>{ el.textContent=''; },200);
+      setTimeout(()=>showMsg(msgs[i]),300);
     }else{ clearInterval(t); renderResult(); }
   },1100);
 }
