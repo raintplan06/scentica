@@ -108,7 +108,7 @@ html[lang="ja"] body,html[lang="zh"] body{word-break:normal;overflow-wrap:break-
   top:calc(76px + env(safe-area-inset-top));left:calc(32px + env(safe-area-inset-left));
   font-size:13px;letter-spacing:.32em;color:var(--ink2);text-indent:.32em;font-weight:500;
 }
-/* 시그니처 요소: 진단→7터치→매치 흐름을 세로선으로 표시 — 빈 여백을 실제 정보로 채운다. */
+/* 시그니처 요소: 진단→5터치→매치 흐름을 세로선으로 표시 — 빈 여백을 실제 정보로 채운다. */
 .intro-spine{
   flex:1;min-height:64px;width:1px;align-self:flex-start;position:relative;
   margin-left:calc(32px + env(safe-area-inset-left));margin-bottom:28px;
@@ -308,7 +308,7 @@ html[lang="ja"] .store{font-size:9.5px;padding:13px 17px}
 .btn-cta .cta-label{font-family:var(--serif);font-size:16px;font-weight:600;letter-spacing:.01em}
 .btn-cta .cta-sub{font-size:12.5px;color:rgba(255,255,255,.65);letter-spacing:.03em}
 .btn-cta.is-btn{border:none;width:100%;font-family:var(--sans);cursor:pointer}
-.btn-cta.gacha-cta{background:#EFDDA6;box-shadow:0 10px 26px rgba(198,165,80,.3)}
+.btn-cta.gacha-cta{background:#EFDDA6}
 .btn-cta.gacha-cta .cta-label{color:#4a3410}
 .btn-cta.gacha-cta .cta-sub{color:rgba(74,52,16,.68)}
 
@@ -318,7 +318,7 @@ html[lang="ja"] .store{font-size:9.5px;padding:13px 17px}
 #scr-gacha.result-only .g-suspense,
 #scr-gacha.result-only .g-base{display:none}
 .gacha-stage{width:100%;display:flex;justify-content:center;margin:22px 0 6px;flex-shrink:0}
-.machine{position:relative;width:320px;max-width:92vw;aspect-ratio:236/312;filter:drop-shadow(0 18px 30px rgba(0,0,0,.18))}
+.machine{position:relative;width:320px;max-width:92vw;aspect-ratio:236/312}
 .machine.shake-slow{animation:gShakeSlow .46s ease-in-out infinite}
 @keyframes gShakeSlow{0%,100%{transform:translateX(0) rotate(0)}50%{transform:translateX(-3px) rotate(-.7deg)}}
 .machine.shake{animation:gShake .1s linear infinite}
@@ -331,7 +331,7 @@ html[lang="ja"] .store{font-size:9.5px;padding:13px 17px}
   display:block;width:100%;min-height:72px;padding:18px 24px;border-radius:999px;border:none;
   background:#EFDDA6;color:#4a3410;
   font-family:var(--serif);font-size:16px;font-weight:600;letter-spacing:.05em;text-indent:.05em;cursor:pointer;
-  transition:transform .12s,opacity .2s;box-shadow:0 10px 26px rgba(198,165,80,.3);
+  transition:transform .12s,opacity .2s;
 }
 .btn-pull:active{transform:scale(.97)}
 .btn-pull:disabled{opacity:.35;pointer-events:none}
@@ -568,7 +568,7 @@ html[lang="ja"] .store{font-size:9.5px;padding:13px 17px}
     <div class="intro-eyebrow" id="introEyebrow">PERFUME CURATION</div>
     <div class="intro-spine" aria-hidden="true">
       <span class="spine-tick">DIAGNOSIS</span>
-      <span class="spine-tick">7 TOUCHES</span>
+      <span class="spine-tick">5 TOUCHES</span>
       <span class="spine-tick">YOUR MATCH</span>
     </div>
     <div class="intro-body">
@@ -653,50 +653,31 @@ html[lang="ja"] .store{font-size:9.5px;padding:13px 17px}
       <div class="machine" id="machine">
         <svg viewBox="0 0 236 312" aria-hidden="true">
           <defs>
-            <radialGradient id="domeGlass" cx="35%" cy="26%" r="78%">
-              <stop offset="0%" stop-color="#ffffff" stop-opacity=".95"/>
-              <stop offset="45%" stop-color="#ffffff" stop-opacity=".2"/>
-              <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
-            </radialGradient>
-            <linearGradient id="bodyGrad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stop-color="#FBF6EA"/>
-              <stop offset="45%" stop-color="#F2E9D3"/>
-              <stop offset="100%" stop-color="#E4D6B1"/>
-            </linearGradient>
-            <linearGradient id="chrome" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stop-color="#f6f6f6"/>
-              <stop offset="50%" stop-color="#cfcfcf"/>
-              <stop offset="100%" stop-color="#8f8f8f"/>
-            </linearGradient>
             <clipPath id="domeClip"><ellipse cx="118" cy="92" rx="88" ry="78"/></clipPath>
           </defs>
 
           <ellipse cx="118" cy="92" rx="92" ry="82" fill="#eeeeed" stroke="rgba(0,0,0,.18)" stroke-width="1.5"/>
           <g id="domeCapsulesSvg" clip-path="url(#domeClip)"></g>
-          <ellipse cx="118" cy="92" rx="89" ry="79" fill="url(#domeGlass)"/>
           <path d="M42,60 Q62,20 112,13" fill="none" stroke="#fff" stroke-opacity=".55" stroke-width="7" stroke-linecap="round"/>
           <ellipse cx="118" cy="92" rx="92" ry="82" fill="none" stroke="rgba(255,255,255,.5)" stroke-width="1"/>
 
-          <rect x="94" y="168" width="48" height="20" rx="4" fill="url(#chrome)"/>
-          <rect x="94" y="168" width="48" height="5" fill="#fff" opacity=".35"/>
+          <rect x="94" y="168" width="48" height="20" rx="4" fill="#cfcfcf"/>
 
-          <rect x="14" y="184" width="208" height="114" rx="24" fill="url(#bodyGrad)"/>
-          <rect x="14" y="184" width="208" height="32" rx="24" fill="#fff" opacity=".4"/>
+          <rect x="14" y="184" width="208" height="114" rx="24" fill="#F2E9D3"/>
 
           <text x="118" y="203" text-anchor="middle" font-family="Georgia,serif" font-size="13" letter-spacing="3" fill="#3a2f18">SCENTICA</text>
           <text x="118" y="216" text-anchor="middle" font-family="Arial,sans-serif" font-size="8" letter-spacing="3.5" fill="#8a7550">GACHA · LUCKY DRAW</text>
 
-          <rect x="32" y="232" width="28" height="9" rx="3" fill="url(#chrome)"/>
-          <rect x="32" y="232" width="28" height="3" fill="#8f8f8f" opacity=".5"/>
+          <rect x="32" y="232" width="28" height="9" rx="3" fill="#cfcfcf"/>
 
           <g class="knob" id="knob">
-          <circle cx="188" cy="238" r="21" fill="url(#chrome)" stroke="rgba(0,0,0,.25)"/>
+          <circle cx="188" cy="238" r="21" fill="#cfcfcf" stroke="rgba(0,0,0,.25)"/>
           <circle cx="188" cy="238" r="21" fill="none" stroke="#fff" stroke-opacity=".5"/>
           <rect x="184" y="219" width="8" height="17" rx="3" fill="#b0b0b0"/>
           <circle cx="188" cy="238" r="5" fill="#a8a8a8"/>
           </g>
 
-          <rect x="60" y="246" width="116" height="50" rx="10" fill="url(#chrome)"/>
+          <rect x="60" y="246" width="116" height="50" rx="10" fill="#cfcfcf"/>
           <rect x="65" y="250" width="106" height="42" rx="7" fill="#c7c7c7" stroke="rgba(255,255,255,.4)"/>
 
           <rect x="34" y="296" width="22" height="14" rx="3" fill="#c9b483"/>
