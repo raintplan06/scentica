@@ -1925,6 +1925,19 @@ function sendGivenLog(lock){
     .catch(()=>{})
     .finally(()=>{ logSending=false; });
 }
+/* 뽑기 기록 → 같은 웹앱의 '뽑기기록' 탭 (증정 여부와 무관하게 뽑을 때마다 한 줄).
+   실패 시 drawLogged가 없어 다음에 이 화면이 그려질 때 다시 보낸다. */
+let drawSending=false;
+function sendDrawLog(lock){
+  if(drawSending)return;
+  drawSending=true;
+  const gtx=GACHA_TEXT.ko[lock.rank-1];
+  fetch(GACHA_LOG_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain'},
+    body:JSON.stringify({type:'draw',store:lock.store||'',rank:lock.rank,prize:gtx?gtx.desc:'',stamp:lock.stamp,lang:LANG,device:DEVICE_ID})})
+    .then(()=>{ const cur=getGachaLock(); if(cur&&cur.stamp===lock.stamp) setGachaLock({...cur,drawLogged:true}); })
+    .catch(()=>{})
+    .finally(()=>{ drawSending=false; });
+}
 /* 직원 확인 버튼: 누르면 오늘 뽑기 기록에 증정 시각을 남겨, 같은 화면을 다시 보여줘도 재증정되지 않게 한다 */
 function renderGivenBtn(lock){
   const b=$('btnGiven');
@@ -1947,6 +1960,7 @@ function applyGachaLock(){
   $('gLockTitle').textContent=gt.lockTitle;
   renderGivenBtn(lock);
   if(lock&&lock.given&&!lock.logged) sendGivenLog(lock);
+  if(lock&&!lock.drawLogged) sendDrawLog(lock);
   if(lock){
     const gtx=GACHA_TEXT[LANG][lock.rank-1];
     $('gLockSub').textContent=gt.lockSub(gtx?gtx.label:lock.rank,gtx?gtx.desc:'',lock.stamp);
@@ -2043,6 +2057,7 @@ function dropCapsule(){
   const idx=pickGacha();
   /* 등수가 정해진 즉시 잠금 저장: 캡슐 색을 보고 결과 전에 새로고침해 다시 뽑는 것 방지 */
   setGachaLock({rank:GACHA_CONFIG[idx].rank,stamp:nowStamp(),store});
+  sendDrawLog(getGachaLock());
   const cfg=GACHA_CONFIG[idx];
   const slot=$('capsuleSlot');
   slot.innerHTML=`<div class="capsule falling" style="--capcolor:${cfg.color}">
@@ -2066,7 +2081,7 @@ function dropCapsule(){
 }
 function showGachaResult(idx){
   gachaDrawn=true; gachaBusy=false;
-  const stamp=nowStamp();
+  const stamp=(getGachaLock()||{}).stamp||nowStamp();
   lastGachaIndex=idx; lastGachaStamp=stamp;
   const cfg=GACHA_CONFIG[idx];
   const res=$('gachaResult');
@@ -2093,7 +2108,7 @@ function showGachaResult(idx){
     burstConfetti(cfg);
     $('gcNotice').style.display='';
     $('scr-gacha').classList.add('result-only');
-    setGachaLock({rank:cfg.rank,stamp,store});
+    setGachaLock({...getGachaLock(),rank:cfg.rank,stamp,store});
     applyGachaLock();
     armIdle();
   },640);
