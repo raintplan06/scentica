@@ -548,7 +548,7 @@ html[lang="ja"] .j-row{grid-template-columns:96px 1fr}
     </div>
     <div class="intro-body">
       <h1 class="intro-title" id="introTitle"><em>일상에 스며드는 향기</em></h1>
-      <p class="intro-sub" id="introSub">일곱 번의 터치로 당신의 취향을 찾아드립니다.</p>
+      <p class="intro-sub" id="introSub">다섯 번의 터치로 당신의 취향을 찾아드립니다.</p>
       <div class="store-label" id="storeLabel">방문하신 매장</div>
       <div class="stores" id="stores"></div>
       <button class="btn-start" id="btnStart">시작하기</button>
@@ -1226,47 +1226,39 @@ const ICONS={
   allSeason:`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 16c5 0 7-8 12-8a4 4 0 0 1 0 8c-5 0-7-8-12-8a4 4 0 1 0 0 8" /></svg>`
 };
 
+/* ps: 결과 화면 기분 풀이(UI.psych.q1~q7)에서 쓸 문장 번호. 질문을 합친 뒤에도 기존 문장을 그대로 쓴다.
+   질문 단위 ps는 선택 번호를 그대로, 선택지 단위 ps는 지정한 번호를 쓴다 */
 const QUESTIONS=[
-{cls:'single',opts:[
+{cls:'single',ps:'q1',opts:[
   {i:'daily',fx:p=>p.use.d*2},
   {i:'special',fx:p=>p.use.o*2},
   {i:'gift',fx:p=>p.use.g*2},
   {i:'refresh',fx:p=>g(p,'ci')*1.2+g(p,'aq')*1.2+g(p,'fr')*1.2}
 ]},
+/* 장면 + 첫인상(탑 노트) 통합: 장면 점수에 어울리는 향 계열 점수를 더함 */
 {cls:'grid3',opts:[
-  {i:'rain',mood:'fresh',fx:p=>g(p,'ci')*1.5+p.cl*1.5},
-  {i:'wave',mood:'aqua',fx:p=>g(p,'aq')*2.5+g(p,'ci')*1},
-  {i:'book',mood:'incense',fx:p=>g(p,'in')*2+g(p,'wd')*1.5},
-  {i:'knit',mood:'musk',fx:p=>g(p,'mu')*2+g(p,'pw')*1.5},
-  {i:'coffee',mood:'gourmand',fx:p=>g(p,'gm')*2.5+p.sw*.5},
-  {i:'bouquet',mood:'floral',fx:p=>g(p,'fl')*2},
-  {i:'party',mood:'party',fx:p=>p.pr*1.3+g(p,'sp')*1.3+g(p,'le')*1}
+  {i:'rain',mood:'fresh',ps:{q2:0,q3:0},fx:p=>g(p,'ci')*1.5+p.cl*1.5+g(p,'ci')*1.5},
+  {i:'wave',mood:'aqua',ps:{q2:1,q3:3},fx:p=>g(p,'aq')*2.5+g(p,'ci')*1+p.cl*1.5+g(p,'mu')*.5},
+  {i:'book',mood:'incense',ps:{q2:2,q3:4},fx:p=>g(p,'in')*2+g(p,'wd')*1.5+g(p,'wd')*1.5},
+  {i:'knit',mood:'musk',ps:{q2:3,q3:3},fx:p=>g(p,'mu')*2+g(p,'pw')*1.5+p.cl*1.5+g(p,'mu')*.5},
+  {i:'coffee',mood:'gourmand',ps:{q2:4,q3:1},fx:p=>g(p,'gm')*2.5+p.sw*.5+g(p,'fr')*1.5},
+  {i:'bouquet',mood:'floral',ps:{q2:5,q3:2},fx:p=>g(p,'fl')*2+g(p,'fl')*1.5},
+  {i:'party',mood:'party',ps:{q2:6,q3:5},fx:p=>p.pr*1.3+g(p,'sp')*1.3+g(p,'le')*1+g(p,'sp')*1.5+p.pr*.7}
 ]},
-{opts:[
-  {i:'citrus',mood:'citrus',fx:p=>g(p,'ci')*1.5},
-  {i:'fruity',mood:'fruity',fx:p=>g(p,'fr')*1.5},
-  {i:'floral',mood:'floral',fx:p=>g(p,'fl')*1.5},
-  {i:'clean',mood:'musk',fx:p=>p.cl*1.5+g(p,'mu')*.5},
-  {i:'woody',mood:'woody',fx:p=>g(p,'wd')*1.5},
-  {i:'spicy',mood:'spicy',fx:p=>g(p,'sp')*1.5+p.pr*.7}
-]},
+/* 단맛 + 존재감 통합: 두 질문의 점수식을 합침 */
 {cls:'single',opts:[
-  {i:'honey',fx:p=>(3-Math.abs(3-p.sw))*1.5},
-  {i:'sweetmid',fx:p=>(3-Math.abs(1.5-p.sw))*1.5},
-  {i:'dry',fx:p=>(3-p.sw)*1.5},
-  {i:'rich',fx:p=>(3-Math.abs(3-p.sw))*1+p.pr*1.2}
+  {i:'dry',ps:{q4:2,q5:0},fx:p=>(3-p.sw)*1.5+(3-Math.abs(1-p.pr))*2},
+  {i:'sweetmid',ps:{q4:1,q5:1},fx:p=>(3-Math.abs(1.5-p.sw))*1.5+(3-Math.abs(2-p.pr))*2},
+  {i:'honey',ps:{q4:0,q5:1},fx:p=>(3-Math.abs(3-p.sw))*1.5+(3-Math.abs(2-p.pr))*2},
+  {i:'strong',ps:{q4:2,q5:2},fx:p=>(3-p.sw)*1.5+(3-Math.abs(3-p.pr))*2},
+  {i:'rich',ps:{q4:3,q5:2},fx:p=>(3-Math.abs(3-p.sw))*1+p.pr*1.2+(3-Math.abs(3-p.pr))*2}
 ]},
-{cls:'single',opts:[
-  {i:'gentle',fx:p=>(3-Math.abs(1-p.pr))*2},
-  {i:'moderate',fx:p=>(3-Math.abs(2-p.pr))*2},
-  {i:'strong',fx:p=>(3-Math.abs(3-p.pr))*2}
-]},
-{cls:'single',opts:[
+{cls:'single',ps:'q6',opts:[
   {i:'beginner',fx:p=>(3-p.ni)*1.5},
   {i:'enjoy',fx:p=>p.ni>=1&&p.ni<=2?3:1},
   {i:'collector',fx:p=>p.ni*1.5}
 ]},
-{cls:'single',opts:[
+{cls:'single',ps:'q7',opts:[
   {i:'warmSeason',fx:p=>(p.se.includes('봄')+p.se.includes('여름'))*1},
   {i:'coolSeason',fx:p=>(p.se.includes('가을')+p.se.includes('겨울'))*1},
   {i:'allSeason',fx:p=>p.se.length===4?2:p.se.length===3?1:0}
@@ -1287,28 +1279,16 @@ ko:[
   {l:'한여름의 바닷가',s:'밀려오는 파도와 시원한 바람'},
   {l:'오래된 서재',s:'책장 사이 먹과 나무의 내음'},
   {l:'포근한 니트의 품',s:'살결에 스미는 따뜻한 온기'},
-  {l:'오후의 카페',s:'갓 내린 커피와 달콤한 디저트'},
+  {l:'오후의 디저트 카페',s:'갓 내린 커피와 과일 타르트'},
   {l:'만개한 꽃집',s:'가득 안긴 꽃다발의 향연'},
   {l:'사람 북적이는 파티의 밤',s:'화려하고 생기 넘치는 사교의 순간'}
 ]},
-{title:'첫 만남, 어떤 인상에 끌리나요?',sub:'향수의 첫 향, 탑 노트의 취향입니다',opts:[
-  {l:'톡 터지는 상큼함',s:'시트러스의 밝은 에너지'},
-  {l:'무르익은 과일의 달콤함',s:'복숭아·망고 같은 프루티'},
-  {l:'화사하게 피어나는 꽃',s:'로즈·피오니 같은 플로럴'},
-  {l:'갓 세탁한 듯한 깨끗함',s:'비누처럼 맑고 클린한 향'},
-  {l:'차분히 가라앉는 나무',s:'우디의 안정감 있는 무게'},
-  {l:'묵직하게 다가오는 무게감',s:'스파이시·앰버 같은 적당한 존재감'}
-]},
-{title:'달콤함은, 어느 정도가 좋나요?',sub:'',opts:[
-  {l:'충분히 달콤하게',s:'기분 좋아지는 스위트함이 좋아요'},
-  {l:'은은하게 스치듯',s:'달콤함은 살짝만 느껴지면 충분해요'},
-  {l:'달지 않게, 담백하게',s:'클린하거나 드라이한 쪽이 좋아요'},
-  {l:'묵직하고 진하게 달콤하게',s:'오리엔탈·구르망처럼 짙은 단맛이 좋아요'}
-]},
-{title:'향의 존재감은 어떠면 좋을까요?',sub:'',opts:[
-  {l:'살결처럼 은은하게',s:'스치듯 가까이에서만 느껴지도록'},
-  {l:'기분 좋은 존재감',s:'과하지 않게, 그러나 분명하게'},
-  {l:'확실한 나의 인장',s:'지나간 자리에 향이 기억되도록'}
+{title:'향의 농도는 어느 정도가 좋나요?',sub:'단맛과 존재감을 함께 골라주세요',opts:[
+  {l:'가볍고 담백하게',s:'달지 않고 살결처럼 은은하게'},
+  {l:'은은하게 달콤하게',s:'살짝 스치는 단맛, 과하지 않은 존재감'},
+  {l:'기분 좋게 달콤하게',s:'확실한 스위트함, 분명한 존재감'},
+  {l:'드라이하고 강렬하게',s:'달지 않지만 확실한 존재감'},
+  {l:'깊고 진하게',s:'짙은 단맛과 오래 남는 여운'}
 ]},
 {title:'향수와 얼마나 친한가요?',sub:'',opts:[
   {l:'이제 알아가는 중',s:'향수는 아직 낯설고 궁금해요'},
@@ -1333,28 +1313,16 @@ en:[
   {l:'A midsummer beach',s:'Rolling waves and a cool breeze'},
   {l:'An old library',s:'Ink and wood scent drifting between the shelves'},
   {l:'Wrapped in a soft knit sweater',s:'Warmth that seeps gently into the skin'},
-  {l:'An afternoon café',s:'Freshly brewed coffee and sweet desserts'},
+  {l:'An afternoon dessert café',s:'Fresh coffee and a fruit tart'},
   {l:'A flower shop in full bloom',s:'An armful of bouquets, a feast of scent'},
   {l:'A lively night at a party',s:'Glamorous, vibrant moments among people'}
 ]},
-{title:'At first meeting, what impression draws you in?',sub:"This is about your taste in top notes — a perfume's first breath",opts:[
-  {l:'A bright citrus burst',s:'The vivid energy of citrus'},
-  {l:'The sweetness of ripe fruit',s:'Fruity notes like peach and mango'},
-  {l:'A flower blooming brightly',s:'Florals like rose and peony'},
-  {l:'The freshness of just-washed linen',s:'A clean, soap-like scent'},
-  {l:'Wood settling calmly',s:'The grounded weight of woody notes'},
-  {l:'A weight that draws near',s:'A moderate presence like spice and amber'}
-]},
-{title:'How much sweetness feels right to you?',sub:'',opts:[
-  {l:'Sweet enough to feel good',s:'A sweetness that lifts my mood'},
-  {l:'Just a soft touch',s:'A hint of sweetness is enough'},
-  {l:'Not sweet, just clean',s:'I prefer clean or dry notes'},
-  {l:'Deep and richly sweet',s:'A dense sweetness like oriental or gourmand notes'}
-]},
-{title:'How present do you want your scent to feel?',sub:'',opts:[
-  {l:'As soft as skin itself',s:'Felt only up close, like a whisper'},
-  {l:'A pleasant presence',s:'Not too much, but unmistakably there'},
-  {l:'A confident signature',s:"A scent remembered long after I've gone"}
+{title:'How rich should your scent be?',sub:'Sweetness and presence in one choice',opts:[
+  {l:'Light and clean',s:'Not sweet, soft as skin'},
+  {l:'Softly sweet',s:'A hint of sweetness, gently present'},
+  {l:'Pleasantly sweet',s:'Clear sweetness with a clear presence'},
+  {l:'Dry and bold',s:'Not sweet, but unmistakably present'},
+  {l:'Deep and intense',s:'Dense sweetness and a lasting trail'}
 ]},
 {title:'How familiar are you with perfume?',sub:'',opts:[
   {l:'Just getting to know it',s:'Perfume still feels new and intriguing'},
@@ -1379,28 +1347,16 @@ zh:[
   {l:'盛夏的海边',s:'拍打而来的海浪与凉爽的风'},
   {l:'古老的书房',s:'书架间墨与木的气息'},
   {l:'温暖针织衫的怀抱',s:'渗入肌肤的暖意'},
-  {l:'午后的咖啡馆',s:'现煮咖啡与甜蜜的甜点'},
+  {l:'午后的甜点咖啡馆',s:'现煮咖啡与水果挞'},
   {l:'繁花盛开的花店',s:'满怀花束的香气盛宴'},
   {l:'人声鼎沸的派对之夜',s:'华丽而充满生气的社交时刻'}
 ]},
-{title:'初次相遇,你会被哪种印象吸引?',sub:'这是关于香水前调、第一缕香气的喜好',opts:[
-  {l:'清爽跳跃的果香',s:'柑橘明亮的活力'},
-  {l:'成熟果实的甜美',s:'桃子、芒果般的果香'},
-  {l:'明艳绽放的花朵',s:'玫瑰、牡丹般的花香'},
-  {l:'如刚洗涤般的洁净感',s:'如香皂般清澈干净的气息'},
-  {l:'沉静内敛的木质',s:'木质调带来的安定重量'},
-  {l:'沉稳靠近的厚重感',s:'辛香、琥珀般恰到好处的存在感'}
-]},
-{title:'你喜欢怎样程度的甜美?',sub:'',opts:[
-  {l:'足够甜美',s:'喜欢让心情愉悦的甜感'},
-  {l:'若隐若现地掠过',s:'甜味只需微微感受到就足够'},
-  {l:'不甜、清爽淡雅',s:'偏爱清透或干燥的气息'},
-  {l:'浓郁醇厚的甜美',s:'喜欢东方调、美食调般浓郁的甜味'}
-]},
-{title:'你希望香气的存在感如何?',sub:'',opts:[
-  {l:'如肌肤般若有似无',s:'只在靠近时才能察觉'},
-  {l:'恰到好处的存在感',s:'不过分张扬,却清晰可辨'},
-  {l:'鲜明的自我印记',s:'让香气在经过之处被人记住'}
+{title:'你喜欢怎样浓度的香气?',sub:'甜度与存在感一起选择',opts:[
+  {l:'轻盈清淡',s:'不甜,如肌肤般若有若无'},
+  {l:'淡淡的甜',s:'一丝甜意,存在感恰到好处'},
+  {l:'愉悦的甜',s:'明确的甜美与清晰的存在感'},
+  {l:'干爽而强烈',s:'不甜,却存在感十足'},
+  {l:'深邃浓郁',s:'浓厚的甜意与持久的余韵'}
 ]},
 {title:'你与香水有多熟悉?',sub:'',opts:[
   {l:'刚刚开始了解',s:'香水对我来说还很陌生又好奇'},
@@ -1425,28 +1381,16 @@ ja:[
   {l:'真夏の海辺',s:'打ち寄せる波と涼しい風'},
   {l:'古い書斎',s:'本棚の間に漂う墨と木の香り'},
   {l:'温かなニットの中',s:'肌に染み込む優しい温もり'},
-  {l:'午後のカフェ',s:'淹れたてのコーヒーと甘いデザート'},
+  {l:'午後のデザートカフェ',s:'淹れたてのコーヒーとフルーツタルト'},
   {l:'満開の花屋',s:'抱えきれないほどの花束の饗宴'},
   {l:'賑やかなパーティーの夜',s:'華やかで活気あふれる社交の瞬間'}
 ]},
-{title:'初めて出会う瞬間、どんな印象に惹かれますか?',sub:'香水の最初の香り、トップノートの好みです',opts:[
-  {l:'はじけるような爽やかさ',s:'シトラスの明るいエネルギー'},
-  {l:'熟した果実の甘さ',s:'桃やマンゴーのようなフルーティ'},
-  {l:'華やかに咲く花',s:'ローズやピオニーのようなフローラル'},
-  {l:'洗い立てのような清潔感',s:'石鹸のように澄んだクリーンな香り'},
-  {l:'静かに沈む木の香り',s:'ウッディの安定した重み'},
-  {l:'重厚に迫る存在感',s:'スパイシーやアンバーのような程よい存在感'}
-]},
-{title:'甘さは、どのくらいが好きですか?',sub:'',opts:[
-  {l:'十分に甘く',s:'気分が上がるスイートさが好き'},
-  {l:'ほのかにかすめる程度',s:'甘さはわずかに感じられれば十分'},
-  {l:'甘くなく、あっさりと',s:'クリーンかドライな方が好き'},
-  {l:'重厚で濃厚な甘さ',s:'オリエンタルやグルマンのような深い甘さが好き'}
-]},
-{title:'香りの存在感は、どうであってほしいですか?',sub:'',opts:[
-  {l:'肌のようにほのかに',s:'すれ違うくらい近くでだけ感じられるように'},
-  {l:'心地よい存在感',s:'過剰ではなく、でも確かに'},
-  {l:'確かな私の印章',s:'通り過ぎた場所にも香りが記憶されるように'}
+{title:'香りの濃さは、どのくらいが好きですか?',sub:'甘さと存在感をまとめて選んでください',opts:[
+  {l:'軽やかでさっぱり',s:'甘くなく、肌のようにほのかに'},
+  {l:'ほんのり甘く',s:'かすかな甘さと控えめな存在感'},
+  {l:'心地よく甘く',s:'はっきりした甘さと確かな存在感'},
+  {l:'ドライで力強く',s:'甘くないけれど確かな存在感'},
+  {l:'深く濃厚に',s:'濃い甘さと長く残る余韻'}
 ]},
 {title:'香水とはどのくらい親しいですか?',sub:'',opts:[
   {l:'まだ知り始めたところ',s:'香水はまだ新鮮で気になる存在'},
@@ -1524,7 +1468,7 @@ const UI={
 ko:{
   intro:{eyebrow:'PERFUME CURATION',
     titleEm:'일상에 스며드는 향기',
-    sub:'일곱 번의 터치로 당신의 취향을 찾아드립니다.',
+    sub:'다섯 번의 터치로 당신의 취향을 찾아드립니다.',
     storeLabel:'방문하신 매장',storePopup:'팝업·기타',storePrefix:'센티카',btnStart:'시작하기'},
   quiz:{sep:'—',back:'←'},
   result:{eyebrow:'YOUR CURATION',title:'당신을 위한 세 가지 향',
@@ -1561,7 +1505,7 @@ ko:{
 en:{
   intro:{eyebrow:'PERFUME CURATION',
     titleEm:'The scent that blends into daily life',
-    sub:"Seven touches — we'll discover what suits you.",
+    sub:"Five touches — we'll discover what suits you.",
     storeLabel:'Store You Visited',storePopup:'Pop-up · Other',storePrefix:'SCENTICA',btnStart:'Start'},
   quiz:{sep:'of',back:'←'},
   result:{eyebrow:'YOUR CURATION',title:'Three Scents, Made for You',
@@ -1597,7 +1541,7 @@ en:{
 zh:{
   intro:{eyebrow:'PERFUME CURATION',
     titleEm:'融入日常的香气',
-    sub:'七次轻触,为你寻回专属的气味喜好。',
+    sub:'五次轻触,为你寻回专属的气味喜好。',
     storeLabel:'到访门店',storePopup:'快闪店·其他',storePrefix:'SCENTICA',btnStart:'开始'},
   quiz:{sep:'/',back:'←'},
   result:{eyebrow:'YOUR CURATION',title:'为你甄选的三款香气',
@@ -1633,7 +1577,7 @@ zh:{
 ja:{
   intro:{eyebrow:'PERFUME CURATION',
     titleEm:'日常に溶け込む<span style="white-space:nowrap">香り</span>',
-    sub:'7回のタッチで、あなたの好みを見つけます。',
+    sub:'5回のタッチで、あなたの好みを見つけます。',
     storeLabel:'ご来店の店舗',storePopup:'ポップアップ・その他',storePrefix:'センティカ',btnStart:'はじめる'},
   quiz:{sep:'/',back:'←'},
   result:{eyebrow:'YOUR CURATION',title:'あなたのための3つの香り',
@@ -1834,8 +1778,9 @@ function matchPcts(top3,minS,maxS){
 
 function psychHTML(bestName){
   const t=UI[LANG].psych;
-  const q1=t.q1[answers[0]], q2=t.q2[answers[1]], q3=t.q3[answers[2]], q4=t.q4[answers[3]],
-        q5=t.q5[answers[4]], q6=t.q6[answers[5]], q7=t.q7[answers[6]];
+  const ix={};
+  QUESTIONS.forEach((q,i)=>Object.assign(ix,q.opts[answers[i]].ps||{[q.ps]:answers[i]}));
+  const [q1,q2,q3,q4,q5,q6,q7]=['q1','q2','q3','q4','q5','q6','q7'].map(k=>t[k][ix[k]]);
   const sep=(LANG==='zh'||LANG==='ja')?'':' '; /* 중국어·일본어는 문장 사이 띄어쓰기 없음 */
   return `<div class="psych-eyebrow">${t.eyebrow}</div>
     <p class="psych-text">${[t.lead,q6,q1,q2,q3,q4,q5].join(sep)}</p>
