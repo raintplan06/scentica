@@ -297,7 +297,9 @@ html[lang="ja"] .store{font-size:9.5px;padding:13px 17px}
 #gcNotice .notice-title{font-size:22px;color:#2a1f08}
 #gcNotice .notice-sub{color:#4a3410;font-weight:500}
 @keyframes gNoticeGlow{0%,100%{transform:scale(1)}50%{transform:scale(1.02)}}
-.r-cta{width:100%;margin:16px 0 4px}
+/* 샘플 키트 신청: 검정 대신 인트로 포인트 브라운 계열의 옅은 톤 */
+.btn-cta.kit-cta{background:#F4ECE3;color:#6B4526;border:1.5px solid rgba(156,107,62,.35)}
+.btn-cta.kit-cta .cta-sub{color:rgba(107,69,38,.7)}
 .btn-cta{
   display:flex;flex-direction:column;align-items:center;gap:4px;
   width:100%;min-height:72px;padding:18px 24px;border-radius:999px;
@@ -619,9 +621,7 @@ html[lang="ja"] .store{font-size:9.5px;padding:13px 17px}
         <span class="cta-sub" id="gachaCtaSub">진단 완료 기념, 캡슐 뽑고 등수 확인하기 →</span>
       </button>
       <button class="btn-retry" id="btnRetry">처음부터 다시하기</button>
-    </div>
-    <div class="r-cta">
-      <a class="btn-cta" href="https://scentica.co.kr/product/detail.html?product_no=74" target="_blank" rel="noopener">
+      <a class="btn-cta kit-cta" href="https://scentica.co.kr/product/detail.html?product_no=74" target="_blank" rel="noopener">
         <span class="cta-label" id="ctaLabel">퍼퓸 3종 샘플 키트 신청</span>
         <span class="cta-sub" id="ctaSub">센티카 이벤트 페이지로 이동 →</span>
       </a>
