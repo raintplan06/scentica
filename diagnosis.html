@@ -1258,15 +1258,19 @@ const QUESTIONS=[
   {i:'strong',ps:{q4:2,q5:2},fx:p=>(3-p.sw)*1.5+(3-Math.abs(3-p.pr))*2},
   {i:'rich',ps:{q4:3,q5:2},fx:p=>(3-Math.abs(3-p.sw))*1+p.pr*1.2+(3-Math.abs(3-p.pr))*2}
 ]},
-{cls:'single',ps:'q6',opts:[
-  {i:'beginner',fx:p=>(3-p.ni)*1.5},
-  {i:'enjoy',fx:p=>p.ni>=1&&p.ni<=2?3:1},
-  {i:'collector',fx:p=>p.ni*1.5}
+/* 향수 경험 4단계: 니치 성향(ni 0~3)과 가까울수록 가점 */
+{cls:'single',opts:[
+  {i:'beginner',ps:{q6:0},fx:p=>(3-p.ni)*1.5},
+  {i:'special',ps:{q6:0},fx:p=>(3-Math.abs(1-p.ni))*1.5},
+  {i:'enjoy',ps:{q6:1},fx:p=>(3-Math.abs(2-p.ni))*1.5},
+  {i:'collector',ps:{q6:2},fx:p=>p.ni*1.5}
 ]},
-{cls:'single',ps:'q7',opts:[
-  {i:'warmSeason',fx:p=>(p.se.includes('봄')+p.se.includes('여름'))*1},
-  {i:'coolSeason',fx:p=>(p.se.includes('가을')+p.se.includes('겨울'))*1},
-  {i:'allSeason',fx:p=>p.se.length===4?2:p.se.length===3?1:0}
+/* 계절 4개: 해당 계절이 포함된 향에 가점 */
+{cls:'single',opts:[
+  {i:'floral',ps:{q7:0},fx:p=>p.se.includes('봄')?2:0},
+  {i:'warmSeason',ps:{q7:0},fx:p=>p.se.includes('여름')?2:0},
+  {i:'dry',ps:{q7:1},fx:p=>p.se.includes('가을')?2:0},
+  {i:'coolSeason',ps:{q7:1},fx:p=>p.se.includes('겨울')?2:0}
 ]}
 ];
 
@@ -1295,13 +1299,15 @@ ko:[
 ]},
 {title:'향수와 얼마나 친한가요?',sub:'',opts:[
   {l:'이제 알아가는 중',s:'향수는 아직 낯설고 궁금해요'},
+  {l:'가끔 뿌리는 편',s:'특별한 날에만 가끔 써요'},
   {l:'즐겨 뿌리는 편',s:'좋아하는 향이 몇 가지 있어요'},
   {l:'향을 수집하는 편',s:'남들과 다른 특별한 향을 찾아요'}
 ]},
 {title:'이 향, 언제 곁에 두고 싶나요?',sub:'',opts:[
-  {l:'봄과 여름',s:'가볍고 산뜻한 계절의 향'},
-  {l:'가을과 겨울',s:'깊고 따뜻한 계절의 향'},
-  {l:'사계절 내내',s:'계절을 타지 않는 나만의 향'}
+  {l:'봄',s:'꽃이 피는 가벼운 계절'},
+  {l:'여름',s:'산뜻하고 시원한 계절'},
+  {l:'가을',s:'차분하고 깊어지는 계절'},
+  {l:'겨울',s:'포근하고 따뜻한 계절'}
 ]}
 ],
 en:[
@@ -1327,13 +1333,15 @@ en:[
 ]},
 {title:'How familiar are you with perfume?',sub:'',opts:[
   {l:'Just getting to know it',s:'Perfume still feels new and intriguing'},
+  {l:'I wear it now and then',s:'Mostly on special days'},
   {l:'I wear it often',s:'I already have a few favorites'},
   {l:'I collect fragrances',s:'I look for scents that stand apart from the rest'}
 ]},
 {title:'When would you like to keep this scent close?',sub:'',opts:[
-  {l:'Spring and summer',s:'A light, fresh seasonal scent'},
-  {l:'Autumn and winter',s:'A deep, warm seasonal scent'},
-  {l:'All year round',s:'A signature scent that knows no season'}
+  {l:'Spring',s:'A light season of blossoms'},
+  {l:'Summer',s:'A fresh, breezy season'},
+  {l:'Autumn',s:'A calm, deepening season'},
+  {l:'Winter',s:'A cozy, warm season'}
 ]}
 ],
 zh:[
@@ -1359,13 +1367,15 @@ zh:[
 ]},
 {title:'你与香水有多熟悉?',sub:'',opts:[
   {l:'刚刚开始了解',s:'香水对我来说还很陌生又好奇'},
+  {l:'偶尔使用',s:'只在特别的日子用一用'},
   {l:'经常使用香水',s:'已经有几款喜欢的香气'},
   {l:'喜欢收藏香水',s:'总在寻找与众不同的独特香气'}
 ]},
 {title:'你希望这款香气何时陪伴你?',sub:'',opts:[
-  {l:'春天与夏天',s:'轻盈清爽的季节香气'},
-  {l:'秋天与冬天',s:'深邃温暖的季节香气'},
-  {l:'四季皆宜',s:'不受季节限制的专属香气'}
+  {l:'春天',s:'花开的轻盈季节'},
+  {l:'夏天',s:'清爽凉快的季节'},
+  {l:'秋天',s:'沉静深邃的季节'},
+  {l:'冬天',s:'温暖舒适的季节'}
 ]}
 ],
 ja:[
@@ -1391,13 +1401,15 @@ ja:[
 ]},
 {title:'香水とはどのくらい親しいですか?',sub:'',opts:[
   {l:'まだ知り始めたところ',s:'香水はまだ新鮮で気になる存在'},
+  {l:'ときどき使う方',s:'特別な日にだけ使う'},
   {l:'よく愛用する方',s:'お気に入りの香りがいくつかある'},
   {l:'香りを集める方',s:'他とは違う特別な香りを探している'}
 ]},
 {title:'この香り、いつそばに置きたいですか?',sub:'',opts:[
-  {l:'春と夏',s:'軽やかで爽やかな季節の香り'},
-  {l:'秋と冬',s:'深く温かな季節の香り'},
-  {l:'一年中',s:'季節を問わない自分だけの香り'}
+  {l:'春',s:'花が咲く軽やかな季節'},
+  {l:'夏',s:'爽やかで涼しげな季節'},
+  {l:'秋',s:'落ち着いて深まる季節'},
+  {l:'冬',s:'ぬくもりのある季節'}
 ]}
 ]
 };
