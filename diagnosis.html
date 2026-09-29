@@ -738,14 +738,25 @@ const P=[
 
 const g=(p,k)=>p.t[k]||0;
 
-/* ===================== 인기도 가중치 (P 배열과 동일한 순서, 0~24번) =====================
-   오프라인 매장 판매분석(전체 상품 매출 리스트)의 '향수'+'향수_플라워' 카테고리
-   판매 수량 기준(24종 전체). 동일 향의 15ml/50ml은 합산, '상탈 누와' 구명 판매분은
-   '상탈 베르트'로 합산했다. 판매 순위(1~24위)를 0~6.0 범위로 선형 변환해 compute()의
-   매칭 점수에 더한다. 실제 시향·구매로 검증된 인기 순위가 향 설명(태그) 매칭보다
-   설득력 있다는 판단에 따라, 취향 매칭과 인기도가 비등한 비중을 갖도록 올린 값이다
-   (시뮬레이션 기준: 1위 추천이 바뀌는 비율 약 35%, 이전 3.0일 때는 약 20%). */
-const POPULARITY=[6.0,2.087,4.696,5.478,1.304,2.87,1.043,4.435,4.174,5.217,0.783,1.826,3.652,4.957,2.609,2.348,3.13,1.565,3.391,5.739,3.913,0.13,0.522,0.13];
+/* ===================== 인기도 가중치 (P 배열과 동일한 순서, 0~23번) =====================
+   오프라인 POS '상품별 조회' 향수 15ml+50ml 판매 수량, 2026-05-01~2026-09-17, 매장별 [광안,소격,전포,한남].
+   '상탈 누와'(구명)는 '상탈 베르트'에 합산. 고객이 고른 매장이 있으면 그 매장 판매량, 없으면 4개 매장 합계로
+   후보군 안에서 log 스케일 0~POP_W 점을 매칭 점수에 더한다 (log: 아벤쿠아 25처럼 압도적인 1위가 나머지를 눌러버리지 않게).
+   판매 데이터가 갱신되면 이 표만 바꾸면 된다. */
+const POP_STORES=['광안','소격','전포','한남'];
+const POP_SALES=[
+[2458,928,2202,1204],[136,54,215,116],[550,249,699,369],[719,430,1389,544],[254,31,143,77],[260,68,242,64],
+[104,18,161,68],[571,153,667,384],[632,93,610,192],[1100,255,1009,294],[116,27,105,29],[183,72,181,84],
+[575,74,457,114],[892,312,1010,297],[215,106,209,89],[233,77,222,44],[474,103,307,123],[236,32,183,56],[456,72,451,95],
+[6677,80,0,253],[0,24,1398,96],[0,41,0,0],[0,138,0,0],[0,0,0,47]
+];
+let POP_W=9;
+function popScores(pool){
+  const si=POP_STORES.indexOf(store);
+  const q=pool.map(o=>{ const r=POP_SALES[o.idx]; return Math.log(1+(si>=0?r[si]:r[0]+r[1]+r[2]+r[3])); });
+  const lo=Math.min(...q), hi=Math.max(...q);
+  return q.map(v=>POP_W*(v-lo)/((hi-lo)||1));
+}
 
 /* ===================== 향수 표시 텍스트 (언어별) ===================== */
 /* PERFUME_TEXT[lang][i] 는 P[i]와 인덱스로 1:1 대응한다. */
@@ -1237,23 +1248,26 @@ const ICONS={
 
 /* ps: 결과 화면 기분 풀이(UI.psych.q1~q7)에서 쓸 문장 번호. 질문을 합친 뒤에도 기존 문장을 그대로 쓴다.
    질문 단위 ps는 선택 번호를 그대로, 선택지 단위 ps는 지정한 번호를 쓴다 */
+/* w: 질문별 비중 (2026-09-29 재조정). 향 계열(Q2)이 기준이고 나머지는 보조, 인기도(POP_W)는 같은 계열 안의 순서를 정한다.
+   시뮬레이션(1,600개 답변 조합): 판매 순위와 추천 빈도 상관 0.80, 1위 추천이 고른 계열과 일치 89% */
 const QUESTIONS=[
-{cls:'single',ps:'q1',opts:[
+{cls:'single',ps:'q1',w:.7,opts:[
   {i:'daily',fx:p=>p.use.d*2},
   {i:'special',fx:p=>p.use.o*2},
   {i:'gift',fx:p=>p.use.g*2},
   {i:'refresh',fx:p=>g(p,'ci')*1.2+g(p,'aq')*1.2+g(p,'fr')*1.2}
 ]},
-/* 향 계열 (구 장면+첫인상 통합 질문을 직접 묻는 방식으로 단순화, 7→5개) */
-{cls:'single',opts:[
-  {i:'citrus',mood:'citrus',ps:{q2:0,q3:0},fx:p=>g(p,'ci')*3+g(p,'aq')*2.5+p.cl*1},
-  {i:'floral',mood:'floral',ps:{q2:5,q3:2},fx:p=>g(p,'fl')*3+g(p,'fr')*2},
-  {i:'clean',mood:'musk',ps:{q2:3,q3:3},fx:p=>g(p,'mu')*2.5+g(p,'pw')*1.5+p.cl*2},
-  {i:'woody',mood:'woody',ps:{q2:2,q3:4},fx:p=>g(p,'wd')*3+g(p,'in')*2},
-  {i:'spicy',mood:'spicy',ps:{q2:6,q3:5},fx:p=>g(p,'sp')*2+g(p,'le')*1.5+g(p,'gm')*2+p.pr*1}
+/* 향 계열: 선택한 계열 중 가장 강한 값 하나만 반영(max) — 여러 계열 태그가 많은 향이 합산으로 독주하지 않게 하고,
+   같은 계열 안에서는 인기도·다른 답변으로 순서가 갈리도록 한다 */
+{cls:'single',w:1,opts:[
+  {i:'citrus',mood:'citrus',ps:{q2:0,q3:0},fx:p=>3*Math.max(g(p,'ci'),g(p,'aq'))},
+  {i:'floral',mood:'floral',ps:{q2:5,q3:2},fx:p=>3*Math.max(g(p,'fl'),g(p,'fr'))},
+  {i:'clean',mood:'musk',ps:{q2:3,q3:3},fx:p=>3*Math.max(g(p,'mu'),g(p,'pw'),p.cl)},
+  {i:'woody',mood:'woody',ps:{q2:2,q3:4},fx:p=>3*Math.max(g(p,'wd'),g(p,'in'))},
+  {i:'spicy',mood:'spicy',ps:{q2:6,q3:5},fx:p=>3*Math.max(g(p,'sp'),g(p,'le'),g(p,'gm'))}
 ]},
 /* 단맛 + 존재감 통합: 두 질문의 점수식을 합침 */
-{cls:'single',opts:[
+{cls:'single',w:.7,opts:[
   {i:'dry',ps:{q4:2,q5:0},fx:p=>(3-p.sw)*1.5+(3-Math.abs(1-p.pr))*2},
   {i:'sweetmid',ps:{q4:1,q5:1},fx:p=>(3-Math.abs(1.5-p.sw))*1.5+(3-Math.abs(2-p.pr))*2},
   {i:'honey',ps:{q4:0,q5:1},fx:p=>(3-Math.abs(3-p.sw))*1.5+(3-Math.abs(2-p.pr))*2},
@@ -1261,14 +1275,14 @@ const QUESTIONS=[
   {i:'rich',ps:{q4:3,q5:2},fx:p=>(3-Math.abs(3-p.sw))*1+p.pr*1.2+(3-Math.abs(3-p.pr))*2}
 ]},
 /* 향수 경험 4단계: 니치 성향(ni 0~3)과 가까울수록 가점 */
-{cls:'single',opts:[
+{cls:'single',w:.5,opts:[
   {i:'beginner',ps:{q6:0},fx:p=>(3-p.ni)*1.5},
   {i:'special',ps:{q6:0},fx:p=>(3-Math.abs(1-p.ni))*1.5},
   {i:'enjoy',ps:{q6:1},fx:p=>(3-Math.abs(2-p.ni))*1.5},
   {i:'collector',ps:{q6:2},fx:p=>p.ni*1.5}
 ]},
 /* 시간·장소 4개: 데일리/외출 용도, 확산력, 계열로 가점 (계절은 보조) */
-{cls:'single',opts:[
+{cls:'single',w:.7,opts:[
   {i:'office',ps:{q7:2},fx:p=>p.use.d*.7+p.cl*.5+(p.pr<=2?.8:0)},
   {i:'warmSeason',ps:{q7:0},fx:p=>(p.se.includes('봄')||p.se.includes('여름')?1:0)+(g(p,'ci')+g(p,'fr')+g(p,'aq'))*.4},
   {i:'date',ps:{q7:1},fx:p=>p.use.o*.7+p.pr*.4+(g(p,'fl')+g(p,'sp')+g(p,'le')+g(p,'gm'))*.25},
@@ -1740,11 +1754,12 @@ function finish(){
 /* ---------- 스코어링 ---------- */
 function compute(){
   const pool=P.map((p,idx)=>({p,idx})).filter(o=>!o.p.store||o.p.store===store);
-  const scored=pool.map(o=>{
+  const pop=popScores(pool);
+  const scored=pool.map((o,j)=>{
     let s=0;
-    QUESTIONS.forEach((q,i)=>{ s+=q.opts[answers[i]].fx(o.p); });
+    QUESTIONS.forEach((q,i)=>{ s+=(q.w||1)*q.opts[answers[i]].fx(o.p); });
     if(o.p.store&&o.p.store===store)s+=1.5;
-    s+=POPULARITY[o.idx]||0;
+    s+=pop[j];
     return {p:o.p,idx:o.idx,s};
   });
   const picks=weightedPick(scored,3);
