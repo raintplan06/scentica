@@ -1230,6 +1230,8 @@ const ICONS={
   collector:`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 9.5a5.5 5.5 0 0 1 9.591-3.676.56.56 0 0 0 .818 0A5.49 5.49 0 0 1 22 9.5c0 2.29-1.5 4-3 5.5l-5.492 5.313a2 2 0 0 1-3 .019L5 15c-1.5-1.5-3-3.2-3-5.5" /></svg>`,
   warmSeason:`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4" /><path d="M12 2v2" /><path d="M12 20v2" /><path d="m4.93 4.93 1.41 1.41" /><path d="m17.66 17.66 1.41 1.41" /><path d="M2 12h2" /><path d="M20 12h2" /><path d="m6.34 17.66-1.41 1.41" /><path d="m19.07 4.93-1.41 1.41" /></svg>`,
   coolSeason:`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="m10 20-1.25-2.5L6 18" /><path d="M10 4 8.75 6.5 6 6" /><path d="m14 20 1.25-2.5L18 18" /><path d="m14 4 1.25 2.5L18 6" /><path d="m17 21-3-6h-4" /><path d="m17 3-3 6 1.5 3" /><path d="M2 12h6.5L10 9" /><path d="m20 10-1.5 2 1.5 2" /><path d="M22 12h-6.5L14 15" /><path d="m4 10 1.5 2L4 14" /><path d="m7 21 3-6-1.5-3" /><path d="m7 3 3 6h4" /></svg>`,
+  office:`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 20V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" /><rect width="20" height="14" x="2" y="6" rx="2" /></svg>`,
+  date:`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 22h8" /><path d="M7 10h10" /><path d="M12 15v7" /><path d="M12 15a5 5 0 0 0 5-5c0-2-.5-4-2-8H9c-1.5 4-2 6-2 8a5 5 0 0 0 5 5Z" /></svg>`,
   allSeason:`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 16c5 0 7-8 12-8a4 4 0 0 1 0 8c-5 0-7-8-12-8a4 4 0 1 0 0 8" /></svg>`
 };
 
@@ -1265,12 +1267,12 @@ const QUESTIONS=[
   {i:'enjoy',ps:{q6:1},fx:p=>(3-Math.abs(2-p.ni))*1.5},
   {i:'collector',ps:{q6:2},fx:p=>p.ni*1.5}
 ]},
-/* 계절 4개: 해당 계절이 포함된 향에 가점 */
+/* 시간·장소 4개: 데일리/외출 용도, 확산력, 계열로 가점 (계절은 보조) */
 {cls:'single',opts:[
-  {i:'floral',ps:{q7:0},fx:p=>p.se.includes('봄')?2:0},
-  {i:'warmSeason',ps:{q7:0},fx:p=>p.se.includes('여름')?2:0},
-  {i:'dry',ps:{q7:1},fx:p=>p.se.includes('가을')?2:0},
-  {i:'coolSeason',ps:{q7:1},fx:p=>p.se.includes('겨울')?2:0}
+  {i:'office',ps:{q7:2},fx:p=>p.use.d*.7+p.cl*.5+(p.pr<=2?.8:0)},
+  {i:'warmSeason',ps:{q7:0},fx:p=>(p.se.includes('봄')||p.se.includes('여름')?1:0)+(g(p,'ci')+g(p,'fr')+g(p,'aq'))*.4},
+  {i:'date',ps:{q7:1},fx:p=>p.use.o*.7+p.pr*.4+(g(p,'fl')+g(p,'sp')+g(p,'le')+g(p,'gm'))*.25},
+  {i:'sweetmid',ps:{q7:1},fx:p=>(p.se.includes('가을')||p.se.includes('겨울')?1:0)+(g(p,'mu')+g(p,'wd')+g(p,'in')+g(p,'pw'))*.3+(p.pr<=1?.6:0)}
 ]}
 ];
 
@@ -1303,11 +1305,11 @@ ko:[
   {l:'즐겨 뿌리는 편',s:'좋아하는 향이 몇 가지 있어요'},
   {l:'향을 수집하는 편',s:'남들과 다른 특별한 향을 찾아요'}
 ]},
-{title:'이 향, 언제 곁에 두고 싶나요?',sub:'',opts:[
-  {l:'봄',s:'꽃이 피는 가벼운 계절'},
-  {l:'여름',s:'산뜻하고 시원한 계절'},
-  {l:'가을',s:'차분하고 깊어지는 계절'},
-  {l:'겨울',s:'포근하고 따뜻한 계절'}
+{title:'이 향, 언제 어디서 뿌리고 싶나요?',sub:'',opts:[
+  {l:'출근길·오피스',s:'매일 가까이서 단정하게'},
+  {l:'주말 나들이',s:'햇살 아래 가볍고 산뜻하게'},
+  {l:'저녁 약속·데이트',s:'특별한 자리에서 인상 깊게'},
+  {l:'밤, 나만의 휴식',s:'집에서 편안하고 포근하게'}
 ]}
 ],
 en:[
@@ -1337,11 +1339,11 @@ en:[
   {l:'I wear it often',s:'I already have a few favorites'},
   {l:'I collect fragrances',s:'I look for scents that stand apart from the rest'}
 ]},
-{title:'When would you like to keep this scent close?',sub:'',opts:[
-  {l:'Spring',s:'A light season of blossoms'},
-  {l:'Summer',s:'A fresh, breezy season'},
-  {l:'Autumn',s:'A calm, deepening season'},
-  {l:'Winter',s:'A cozy, warm season'}
+{title:'When and where will you wear it?',sub:'',opts:[
+  {l:'Commute & office',s:'Neat and close, every day'},
+  {l:'Weekend outings',s:'Light and fresh in the sunshine'},
+  {l:'Evening plans & dates',s:'Memorable at special moments'},
+  {l:'Quiet nights in',s:'Cozy and relaxing at home'}
 ]}
 ],
 zh:[
@@ -1371,11 +1373,11 @@ zh:[
   {l:'经常使用香水',s:'已经有几款喜欢的香气'},
   {l:'喜欢收藏香水',s:'总在寻找与众不同的独特香气'}
 ]},
-{title:'你希望这款香气何时陪伴你?',sub:'',opts:[
-  {l:'春天',s:'花开的轻盈季节'},
-  {l:'夏天',s:'清爽凉快的季节'},
-  {l:'秋天',s:'沉静深邃的季节'},
-  {l:'冬天',s:'温暖舒适的季节'}
+{title:'你想在什么时候、什么场合使用?',sub:'',opts:[
+  {l:'通勤·办公室',s:'每天贴身,干净得体'},
+  {l:'周末出游',s:'阳光下轻盈清爽'},
+  {l:'晚间约会',s:'在特别的场合留下印象'},
+  {l:'夜晚独处时光',s:'在家舒适放松'}
 ]}
 ],
 ja:[
@@ -1405,11 +1407,11 @@ ja:[
   {l:'よく愛用する方',s:'お気に入りの香りがいくつかある'},
   {l:'香りを集める方',s:'他とは違う特別な香りを探している'}
 ]},
-{title:'この香り、いつそばに置きたいですか?',sub:'',opts:[
-  {l:'春',s:'花が咲く軽やかな季節'},
-  {l:'夏',s:'爽やかで涼しげな季節'},
-  {l:'秋',s:'落ち着いて深まる季節'},
-  {l:'冬',s:'ぬくもりのある季節'}
+{title:'この香り、いつどこでつけたいですか?',sub:'',opts:[
+  {l:'通勤・オフィス',s:'毎日身近に、きちんと'},
+  {l:'週末のおでかけ',s:'日差しの下で軽やかに'},
+  {l:'夜の約束・デート',s:'特別な場で印象的に'},
+  {l:'夜のひとり時間',s:'家でくつろいで心地よく'}
 ]}
 ]
 };
