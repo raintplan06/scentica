@@ -2041,6 +2041,8 @@ $('btnPull').addEventListener('click',()=>{
 });
 function dropCapsule(){
   const idx=pickGacha();
+  /* 등수가 정해진 즉시 잠금 저장: 캡슐 색을 보고 결과 전에 새로고침해 다시 뽑는 것 방지 */
+  setGachaLock({rank:GACHA_CONFIG[idx].rank,stamp:nowStamp(),store});
   const cfg=GACHA_CONFIG[idx];
   const slot=$('capsuleSlot');
   slot.innerHTML=`<div class="capsule falling" style="--capcolor:${cfg.color}">
