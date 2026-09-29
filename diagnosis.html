@@ -445,6 +445,19 @@ html[lang="ja"] .j-row{grid-template-columns:96px 1fr}
   .brand{font-size:14px;letter-spacing:.14em;text-indent:.14em}
   .langbar{top:calc(10px + env(safe-area-inset-top));right:10px;gap:3px}
   .lang-btn{width:26px;height:18px}
+  /* 모바일 설문 압축: 스크롤 줄이기 (태블릿·PC는 위 기본값 유지) */
+  .prog{margin:10px 0 18px}
+  .q-title{font-size:23px;line-height:1.35}
+  .q-sub{margin-top:6px;font-size:13.5px}
+  .opts{margin-top:18px;gap:8px}
+  .opts.grid3,.opts:not(.single){grid-template-columns:1fr 1fr}
+  .opt{min-height:0;padding:12px 14px;border-radius:14px;gap:3px}
+  .opt .ic{width:19px;height:19px;margin-bottom:2px}
+  .opt .l{font-size:15.5px;line-height:1.35}
+  .opt .s{font-size:12.5px;line-height:1.4}
+  .opts:not(.single) .opt:last-child:nth-child(odd){grid-column:span 2}
+  .opts.single .opt{display:grid;grid-template-columns:22px 1fr;column-gap:10px;align-items:center}
+  .opts.single .opt .ic{grid-row:span 2;margin:0}
 }
 </style>
 </head>
