@@ -338,6 +338,8 @@ html[lang="ja"] .store{font-size:9.5px;padding:13px 17px}
   transition:transform .12s,opacity .2s;
 }
 .btn-pull:active{transform:scale(.97)}
+.pull-pin{display:block;width:100%;margin-bottom:12px;padding:14px 20px;border-radius:999px;border:1.5px solid #EFDDA6;background:transparent;color:var(--ink);font-size:16px;text-align:center;letter-spacing:.2em}
+.pull-pin::placeholder{letter-spacing:.06em;color:var(--ink2)}
 .btn-pull:disabled{opacity:.35;pointer-events:none}
 .capsule{width:46px;height:46px;border-radius:50%;position:relative;border:3px solid #111;box-shadow:0 0 0 2.5px #fff,0 5px 0 2.5px rgba(0,0,0,.18);overflow:hidden;background:#fff}
 .capsule .cap-top{position:absolute;left:0;right:0;top:0;height:54%;background:#fff}
@@ -706,6 +708,7 @@ html[lang="ja"] .store{font-size:9.5px;padding:13px 17px}
     </div>
     <p class="g-suspense" id="gSuspense">&nbsp;</p>
     <div class="g-base">
+      <input class="pull-pin" id="pullPin" type="password" inputmode="numeric" autocomplete="off" maxlength="8" placeholder="직원 PIN · STAFF PIN">
       <button class="btn-pull" id="btnPull">캡슐 뽑기</button>
     </div>
 
@@ -1450,15 +1453,15 @@ ja:[
 /* ===================== 가챠 이벤트 데이터 ===================== */
 /* 언어 무관 설정 (확률/색상/애니메이션) */
 const GACHA_CONFIG=[
-{rank:1,weight:1,grad:'linear-gradient(135deg,#F8E3A1,#C6A550)',gink:'#5b4a1f',color:'#F5B400',
+{rank:1,grad:'linear-gradient(135deg,#F8E3A1,#C6A550)',gink:'#5b4a1f',color:'#F5B400',
  emojis:['🎉','🏆','✨','⭐'],confetti:{count:52,dist:220,dur:2200}},
-{rank:2,weight:3,grad:'linear-gradient(135deg,#F2F2F2,#BDBDBD)',gink:'#4a4a4a',color:'#C9D1DB',
+{rank:2,grad:'linear-gradient(135deg,#F2F2F2,#BDBDBD)',gink:'#4a4a4a',color:'#C9D1DB',
  emojis:['🎊','🥈','✨'],confetti:{count:38,dist:180,dur:1900}},
-{rank:3,weight:10,grad:'linear-gradient(135deg,#E3C2A0,#B07C4F)',gink:'#4a2f18',color:'#E08A55',
+{rank:3,grad:'linear-gradient(135deg,#E3C2A0,#B07C4F)',gink:'#4a2f18',color:'#E08A55',
  emojis:['🎊','🥉','✨'],confetti:{count:28,dist:150,dur:1650}},
-{rank:4,weight:30,grad:'linear-gradient(135deg,#DADADA,#9E9E9E)',gink:'#3a3a3a',color:'#43D1A8',
+{rank:4,grad:'linear-gradient(135deg,#DADADA,#9E9E9E)',gink:'#3a3a3a',color:'#43D1A8',
  emojis:['🎁','✨'],confetti:{count:18,dist:120,dur:1350}},
-{rank:5,weight:56,grad:'linear-gradient(135deg,#F5F5F5,#DCDCDC)',gink:'#3a3a3a',color:'#5AAEFF',
+{rank:5,grad:'linear-gradient(135deg,#F5F5F5,#DCDCDC)',gink:'#3a3a3a',color:'#5AAEFF',
  emojis:['✨'],confetti:{count:10,dist:90,dur:1100}}
 ];
 /* 언어별 텍스트 (tag는 브랜딩 상 영어 고정) */
@@ -1931,19 +1934,6 @@ function sendGivenLog(lock){
     .catch(()=>{})
     .finally(()=>{ logSending=false; });
 }
-/* 뽑기 기록 → 같은 웹앱의 '뽑기기록' 탭 (증정 여부와 무관하게 뽑을 때마다 한 줄).
-   실패 시 drawLogged가 없어 다음에 이 화면이 그려질 때 다시 보낸다. */
-let drawSending=false;
-function sendDrawLog(lock){
-  if(drawSending)return;
-  drawSending=true;
-  const gtx=GACHA_TEXT.ko[lock.rank-1];
-  fetch(GACHA_LOG_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain'},
-    body:JSON.stringify({type:'draw',store:lock.store||'',rank:lock.rank,prize:gtx?gtx.desc:'',stamp:lock.stamp,lang:LANG,device:DEVICE_ID})})
-    .then(()=>{ const cur=getGachaLock(); if(cur&&cur.stamp===lock.stamp) setGachaLock({...cur,drawLogged:true}); })
-    .catch(()=>{})
-    .finally(()=>{ drawSending=false; });
-}
 /* 직원 확인 버튼: 누르면 오늘 뽑기 기록에 증정 시각을 남겨, 같은 화면을 다시 보여줘도 재증정되지 않게 한다 */
 function renderGivenBtn(lock){
   const b=$('btnGiven');
@@ -1966,7 +1956,6 @@ function applyGachaLock(){
   $('gLockTitle').textContent=gt.lockTitle;
   renderGivenBtn(lock);
   if(lock&&lock.given&&!lock.logged) sendGivenLog(lock);
-  if(lock&&!lock.drawLogged) sendDrawLog(lock);
   if(lock){
     const gtx=GACHA_TEXT[LANG][lock.rank-1];
     $('gLockSub').textContent=gt.lockSub(gtx?gtx.label:lock.rank,gtx?gtx.desc:'',lock.stamp);
@@ -1974,11 +1963,11 @@ function applyGachaLock(){
        결과 카드 하단의 1일 1회 문구로 충분하다. 재접속(두 번째부터)에만
        상단에 '이미 참여하셨습니다' 안내를 노출한다. */
     notice.style.display=(lastGachaIndex===null)?'':'none';
-    pull.disabled=true; pull.textContent=gt.pullDone;
+    pull.disabled=true; pull.textContent=gt.pullDone; $('pullPin').style.display='none';
     gachaDrawn=true;
   }else{
     notice.style.display='none';
-    pull.textContent=gt.pull;
+    pull.textContent=gt.pull; $('pullPin').style.display='';
     if(!gachaBusy){ pull.disabled=false; gachaDrawn=false; }
   }
 }
@@ -2015,12 +2004,6 @@ function burstConfetti(cfg){
   }
   setTimeout(()=>{ layer.innerHTML=''; },dur+700);
 }
-function pickGacha(){
-  const total=GACHA_CONFIG.reduce((a,c)=>a+c.weight,0);
-  let r=Math.random()*total;
-  for(let i=0;i<GACHA_CONFIG.length;i++){ if(r<GACHA_CONFIG[i].weight)return i; r-=GACHA_CONFIG[i].weight; }
-  return GACHA_CONFIG.length-1;
-}
 /* 캡슐 색 팔레트 (돔 장식 + 배출 캡슐 공용). 등수와 무관 — 결과 숫자가 뜨기 전에는 등수를 알 수 없게 */
 const CAPSULE_COLS=['#FF8FB8','#43D1A8','#5AAEFF','#FFD43B','#A98BFF','#FF9A3C'];
 function fillDome(){
@@ -2049,9 +2032,29 @@ function fillDome(){
   box.innerHTML=`<g class="dome-mix">${html}</g>`;
 }
 let gachaDrawn=false, gachaBusy=false;
+/* 뽑기는 서버(GACHA_LOG_URL)가 직원 PIN 확인 후 등수를 정하고 뽑기기록에 남긴다.
+   브라우저 잠금만으로는 시크릿 창 반복 참여를 못 막기 때문 (2026-10-01) */
 $('btnPull').addEventListener('click',()=>{
   if(gachaBusy||gachaDrawn||getGachaLock())return;
-  gachaBusy=true; $('btnPull').disabled=true;
+  const pinEl=$('pullPin'), susp=$('gSuspense'), pin=pinEl.value.trim();
+  if(!pin){ susp.textContent='직원 PIN을 입력해주세요 · Please ask staff'; pinEl.focus(); return; }
+  gachaBusy=true; $('btnPull').disabled=true; susp.textContent='…';
+  fetch(GACHA_LOG_URL,{method:'POST',headers:{'Content-Type':'text/plain'},
+    body:JSON.stringify({type:'pull',pin,store:store||'',lang:LANG,device:DEVICE_ID})})
+    .then(r=>r.json())
+    .then(res=>{
+      if(!res.ok) throw new Error(res.err);
+      pinEl.value=''; pinEl.style.display='none';
+      runPull(res.rank-1,res.stamp);
+    })
+    .catch(err=>{
+      gachaBusy=false; $('btnPull').disabled=false;
+      susp.textContent=err.message==='pin'?'PIN이 맞지 않습니다 · Wrong PIN'
+        :err.message==='locked'?'잠시 후 다시 시도해주세요 · Try again later'
+        :'연결 오류, 다시 시도해주세요 · Network error';
+    });
+});
+function runPull(idx,stamp){
   const susp=$('gSuspense'), mach=$('machine'), msgs=SUSPENSE_MSGS[LANG];
   susp.textContent=msgs[0];
   mach.classList.add('shake-slow');
@@ -2065,13 +2068,11 @@ $('btnPull').addEventListener('click',()=>{
     mach.classList.remove('shake');
     susp.textContent=msgs[2];
   },2900);
-  setTimeout(()=>{ susp.innerHTML='&nbsp;'; dropCapsule(); },3400);
-});
-function dropCapsule(){
-  const idx=pickGacha();
-  /* 등수가 정해진 즉시 잠금 저장: 캡슐 색을 보고 결과 전에 새로고침해 다시 뽑는 것 방지 */
-  setGachaLock({rank:GACHA_CONFIG[idx].rank,stamp:nowStamp(),store});
-  sendDrawLog(getGachaLock());
+  setTimeout(()=>{ susp.innerHTML='&nbsp;'; dropCapsule(idx,stamp); },3400);
+}
+function dropCapsule(idx,stamp){
+  /* 서버 기록은 이미 끝남. 잠금은 이 기기에서 결과·증정 버튼을 다시 보여주는 용도 */
+  setGachaLock({rank:GACHA_CONFIG[idx].rank,stamp,store});
   const slot=$('capsuleSlot');
   slot.innerHTML=`<div class="capsule falling" style="--capcolor:${CAPSULE_COLS[Math.floor(Math.random()*CAPSULE_COLS.length)]}">
     <div class="cap-top"></div><div class="cap-bot"></div><div class="cap-seam"></div><div class="cap-shine"></div>
